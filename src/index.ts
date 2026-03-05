@@ -7,6 +7,26 @@ import {
   POLL_INTERVAL,
   TRIGGER_PATTERN,
 } from './config.js';
+
+function appendLog(
+  groupName: string,
+  type: 'prompt' | 'response',
+  text: string,
+): void {
+  try {
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10); // YYYY-MM-DD
+    const timeStr = now.toTimeString().slice(0, 8); // HH:MM:SS
+    const logDir = path.join(process.cwd(), 'logs', 'prompts');
+    fs.mkdirSync(logDir, { recursive: true });
+    const logFile = path.join(logDir, `${dateStr}.md`);
+    const label = type === 'prompt' ? '### 지시사항' : '### 응답';
+    const entry = `\n## ${timeStr} — ${groupName} [${type}]\n\n${label}\n${text}\n\n---\n`;
+    fs.appendFileSync(logFile, entry, 'utf-8');
+  } catch (err) {
+    logger.error({ err }, 'Failed to write prompt log');
+  }
+}
 import './channels/index.js';
 import {
   getChannelFactory,
@@ -163,6 +183,9 @@ async function processGroupMessages(chatJid: string): Promise<boolean> {
 
   const prompt = formatMessages(missedMessages);
 
+  // Log incoming prompt immediately (container may stay alive across sessions)
+  appendLog(group.name, 'prompt', prompt);
+
   // Advance cursor so the piping path in startMessageLoop won't re-fetch
   // these messages. Save the old cursor so we can roll back on error.
   const previousCursor = lastAgentTimestamp[chatJid] || '';
@@ -205,6 +228,7 @@ async function processGroupMessages(chatJid: string): Promise<boolean> {
       logger.info({ group: group.name }, `Agent output: ${raw.slice(0, 200)}`);
       if (text) {
         await channel.sendMessage(chatJid, text);
+        appendLog(group.name, 'response', text);
         outputSentToUser = true;
       }
       // Only reset idle timer on actual results, not session-update markers (result: null)
@@ -398,6 +422,7 @@ async function startMessageLoop(): Promise<void> {
           const formatted = formatMessages(messagesToSend);
 
           if (queue.sendMessage(chatJid, formatted)) {
+            appendLog(group.name, 'prompt', formatted);
             logger.debug(
               { chatJid, count: messagesToSend.length },
               'Piped messages to active container',
