@@ -6,6 +6,117 @@
   An AI assistant that runs agents securely in their own containers. Lightweight, built to be easily understood and completely customized for your needs.
 </p>
 
+---
+
+## 한국어 안내
+
+### 프로그램 설명
+
+NanoClaw는 Claude AI 에이전트를 Docker 컨테이너 안에서 격리 실행하는 개인용 AI 어시스턴트입니다.
+Slack 등 메시징 채널과 연결되어 `@Andy` 멘션으로 에이전트를 호출할 수 있으며, 그룹별로 독립된 메모리와 파일시스템을 가집니다.
+
+**현재 설정:**
+- 채널: Slack (`slack_main` 그룹)
+- 트리거 단어: `@Andy`
+- 에이전트 실행: Docker 컨테이너 (`nanoclaw-agent:latest`)
+
+---
+
+### 주요 기능
+
+| 기능 | 설명 |
+|------|------|
+| **메시지 응답** | Slack에서 `@Andy` 멘션하면 Claude 에이전트가 응답 |
+| **웹 검색 / 브라우징** | 인터넷 검색 및 페이지 크롤링 가능 |
+| **파일 작업** | 그룹 폴더 안에서 파일 생성·수정·읽기 |
+| **예약 작업** | "매주 월요일 9시에 ..." 식의 정기 실행 |
+| **그룹별 메모리** | 각 그룹의 `CLAUDE.md`에 맥락·지시사항 저장 |
+| **컨테이너 격리** | 에이전트는 Docker 컨테이너 안에서만 실행 (호스트 안전) |
+| **멀티채널** | Slack 외 Telegram, WhatsApp 등 추가 가능 |
+| **에이전트 스웜** | 여러 에이전트가 팀으로 협업하는 복잡한 작업 처리 |
+
+**사용 예시:**
+```
+@Andy 오늘 날씨 알려줘
+@Andy 이 CSV 파일 분석해서 요약해줘
+@Andy 매주 금요일 오후 6시에 이번 주 작업 내용 정리해서 알려줘
+@Andy 뉴스에서 AI 관련 소식 찾아서 정리해줘
+```
+
+---
+
+### 셋업 방법 (최초 설치)
+
+**사전 요건:** Node.js 20+, Docker
+
+```bash
+# 1. 의존성 설치 및 빌드
+cd /PROJECT/0325120037_A/jyh/nanoclaw
+npm install
+npm run build
+
+# 2. 에이전트 컨테이너 이미지 빌드 (최초 1회, 10~20분 소요)
+./container/build.sh
+
+# 3. .env 파일 설정
+# 아래 항목을 .env에 작성
+# CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-...
+# SLACK_BOT_TOKEN=xoxb-...
+# SLACK_APP_TOKEN=xapp-...
+```
+
+---
+
+### 실행 방법
+
+**백그라운드 실행 (정식)**
+```bash
+bash start-nanoclaw.sh
+```
+
+**로그 확인**
+```bash
+tail -f logs/nanoclaw.log        # 메인 로그
+tail -f logs/nanoclaw.error.log  # 에러 로그
+```
+
+**중지**
+```bash
+kill $(cat nanoclaw.pid)
+```
+
+**재시작**
+```bash
+bash start-nanoclaw.sh  # 기존 프로세스 자동 종료 후 재시작
+```
+
+**개발 모드 (코드 수정 시 자동 반영)**
+```bash
+npm run dev
+```
+
+---
+
+### 타 서버 이전 방법
+
+자세한 내용은 [RUN_GUIDE_KR.md](RUN_GUIDE_KR.md) 참고.
+
+**기존 서버에서:**
+```bash
+bash export-for-migration.sh
+# → nanoclaw-migration.tar.gz 생성 (.env, DB, CLAUDE.md 포함)
+```
+
+**새 서버에서:**
+```bash
+git clone <repo_url> nanoclaw && cd nanoclaw
+# nanoclaw-migration.tar.gz 복사 후:
+tar -xzf nanoclaw-migration.tar.gz
+bash setup-new-server.sh
+```
+
+---
+
 <p align="center">
   <a href="https://nanoclaw.dev">nanoclaw.dev</a>&nbsp; • &nbsp;
   <a href="README_zh.md">中文</a>&nbsp; • &nbsp;
