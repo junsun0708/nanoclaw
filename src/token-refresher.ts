@@ -9,7 +9,11 @@ import path from 'path';
 
 import { logger } from './logger.js';
 
-const CREDENTIALS_PATH = path.join(os.homedir(), '.claude', '.credentials.json');
+const CREDENTIALS_PATH = path.join(
+  os.homedir(),
+  '.claude',
+  '.credentials.json',
+);
 const REFRESH_URL = 'https://platform.claude.com/v1/oauth/token';
 const CLIENT_ID = '9d1c250a-e61b-44d9-88ed-5944d1962f5e';
 
@@ -111,11 +115,15 @@ export async function refreshTokenIfNeeded(): Promise<void> {
 
     // Update credentials file
     credentials.claudeAiOauth.accessToken = newAccessToken;
-    if (newRefreshToken) credentials.claudeAiOauth.refreshToken = newRefreshToken;
+    if (newRefreshToken)
+      credentials.claudeAiOauth.refreshToken = newRefreshToken;
     if (expiresIn) {
       credentials.claudeAiOauth.expiresAt = Date.now() + expiresIn * 1000;
     }
-    fs.writeFileSync(CREDENTIALS_PATH, JSON.stringify(credentials, null, 2) + '\n');
+    fs.writeFileSync(
+      CREDENTIALS_PATH,
+      JSON.stringify(credentials, null, 2) + '\n',
+    );
 
     // Update .env so the next container spawn picks up the fresh token
     updateEnvFile(newAccessToken);
