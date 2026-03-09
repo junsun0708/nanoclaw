@@ -95,7 +95,7 @@ Available groups are provided in `/workspace/ipc/available_groups.json`:
 }
 ```
 
-Groups are ordered by most recent activity. The list is synced from WhatsApp daily.
+Groups are ordered by most recent activity. The list is synced from the connected messaging channel.
 
 If a group the user mentions isn't in the list, request a fresh sync:
 
@@ -190,14 +190,25 @@ The directory will appear at `/workspace/extra/webapp` in that group's container
 
 ### Removing a Group
 
-1. Read `/workspace/project/data/registered_groups.json`
-2. Remove the entry for that group
-3. Write the updated JSON back
-4. The group folder and its files remain (don't delete them)
+Use SQLite to remove a group from the database:
+
+```bash
+sqlite3 /workspace/project/store/messages.db "
+  DELETE FROM registered_groups WHERE jid = 'group-jid-here';
+"
+```
+
+The group folder and its files remain (don't delete them). NanoClaw picks up the change on next restart.
 
 ### Listing Groups
 
-Read `/workspace/project/data/registered_groups.json` and format it nicely.
+Query the SQLite database:
+
+```bash
+sqlite3 /workspace/project/store/messages.db "
+  SELECT jid, name, folder, is_main FROM registered_groups;
+"
+```
 
 ---
 
