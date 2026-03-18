@@ -2,7 +2,7 @@
 
 ## 채널 정보
 - 이 채널은 **메인 채널** (isMain: true)이다 — 관리자 권한 보유
-- 채널: Slack (slack_main 그룹, 채널 ID: C0AJEJLD71Q)
+- 채널: Slack (slack_main 그룹)
 - 트리거 단어: `@Andy` (메인 채널이므로 트리거 없어도 모든 메시지 처리)
 
 ## 관리자 기능

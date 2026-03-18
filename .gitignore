@@ -27,6 +27,10 @@ groups/slack_main/*
 
 # Temp files
 .tmp-*
+*.tar.gz
+
+# Runtime
+nanoclaw.pid
 
 # OS
 .DS_Store
